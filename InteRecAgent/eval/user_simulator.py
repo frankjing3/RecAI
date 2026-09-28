@@ -532,7 +532,7 @@ def main():
     if not os.path.exists(os.path.dirname(save_path)):
         os.makedirs(os.path.dirname(save_path))
 
-    domain = os.environ["DOMAIN"]
+    domain = DOMAIN
     print(f"Domain = {domain}.")
 
     domain_map = {'item': domain, 'Item': domain.capitalize(), 'ITEM': domain.upper()}

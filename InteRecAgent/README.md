@@ -71,43 +71,56 @@ InteRecAgent consists of 4 necessary components:
 
 3. How to run
 
-    - If you are using personal OpenAI API, please setup those environments:
+    Copy the configuration template and fill in your API key:
 
-        ```bash
-        export OPENAI_API_KEY="xxxx"  
-        export API_TYPE="open_ai"
-        ```
+    ```bash
+    cp .env.example .env
+    ```
 
-    - If you are using Azure OpenAI API, please setup those environments:
+    On Windows PowerShell, use:
 
+    ```powershell
+    Copy-Item .env.example .env
+    ```
 
-        ```bash
-        export OPENAI_API_KEY="xxx" 
-        export OPENAI_API_BASE="xxx" 
-        export OPENAI_API_VERSION="xxx" 
-        export OPENAI_API_TYPE="azure"
-        ```
+    The default `.env` configuration uses the OpenAI-compatible API. For Azure,
+    set `OPENAI_API_TYPE=azure`, `OPENAI_API_BASE`, `OPENAI_API_VERSION`, and use
+    the Azure deployment name for `AGENT_ENGINE`/`OPENAI_ENGINE`. The local `.env`
+    file is ignored by Git so that API secrets are not committed. Existing operating-
+    system variables take precedence over `.env` values.
 
-    Then, you can launch the app with: 
+    Then launch the app from the `InteRecAgent` directory:
 
     ```bash 
-    DOMAIN=game python app.py --engine gpt-4
+    python app.py
     ```
 
     Note that `DOMAIN` represents the item domain, e.g., `game`, `movie` and `beauty_product` in the provided data sources. Replace `gpt-4` with your own deploy name when using Azure OpenAI API. 
 
-    We also provide a shell script `run.sh`, where commonly used arguments are given. You could directly set the API related information in `run.sh`, or create a new shell script `oai.sh` that would be loaded in `run.sh`. GPT-4 API is highly recommended for the InteRecAgent since it has remarkable instruction-following capability.
+    The configuration entry also accepts the paper dataset names as aliases:
 
-    Here is an example of the `oai.sh` script:
+    | Paper dataset | RecAI domain |
+    | --- | --- |
+    | Steam | `game` |
+    | MovieLens | `movie` |
+    | Amazon Beauty | `beauty_product` |
+
+    To inspect one resolved configuration or verify all three installed resource bundles, run:
 
     ```bash
-    API_KEY="xxxxxx" # your api key
-    API_BASE="https://xxxx.azure.com/" # [https://xxxx.azure.com, https://api.openai.com/v1]
-    API_VERSION="2023-03-15-preview"
-    API_TYPE="azure" # ['open_ai', 'azure']
-    engine="gpt4"   # model name for OpenAI or deployment name for Azure OpenAI. GPT-4 is recommended.
-    bot_type="chat" # model type, ["chat", "completetion"]. For gpt-3.5-turbo and gpt-4, it should be "chat". For text-davinci-003, it should be "completetion" 
+    python llm4crs/environ_variables.py
+    python tests/verify_resources.py
     ```
+
+    The ready-to-run bundle contains the online artifacts consumed by InteRecAgent: the
+    item metadata table, table-column descriptions, precomputed ItemCF similarity matrix,
+    and trained SASRec checkpoint. User interaction histories and the leave-one-out
+    train/validation/test splits are offline training inputs documented in `preprocess/`;
+    they are not read by `environ_variables.py` at serving time.
+
+    `run.sh` reads the same `.env`; API credentials no longer need to be embedded in
+    shell scripts. GPT-4-class models are recommended because tool planning requires
+    strong instruction following.
 
     Meanwhile, we support to serve local models such as Vicuna or other opensource models as the backbone language models instead of OpenAI APIs:
     
@@ -126,15 +139,15 @@ InteRecAgent consists of 4 necessary components:
         python3 -m fastchat.serve.openai_api_server --host localhost --port 8000
         ```
 
-    4. Set the configuration for local model API in `run.sh`
+    4. Set the configuration for the local model API in `.env`
 
-        ```bash
-        API_KEY="EMPTY"
-        API_BASE="http://localhost:8000/v1"
-        API_VERSION="2023-03-15-preview"
-        API_TYPE="open_ai"
-        engine="vicuna-7b-v1.5"   # model name
-        bot_type="completetion" # model type
+        ```dotenv
+        OPENAI_API_KEY=EMPTY
+        OPENAI_API_BASE=http://localhost:8000/v1
+        OPENAI_API_TYPE=open_ai
+        AGENT_ENGINE=vicuna-7b-v1.5
+        OPENAI_ENGINE=vicuna-7b-v1.5
+        OPENAI_ENGINE_TYPE=chat
         ```
 
     5. Run the `run.sh` script to start the chatbot.

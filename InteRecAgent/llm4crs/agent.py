@@ -103,6 +103,10 @@ class CRSAgent:
 
     def set_oai_env(self):
         api_type = os.environ.get("OPENAI_API_TYPE", "")
+        if api_type == "codex":
+            # Codex uses the OpenAI wire format; this legacy adapter only
+            # recognizes the provider name `open_ai`.
+            api_type = "open_ai"
         if len(api_type) > 0: 
             openai.api_base = os.environ.get("OPENAI_API_BASE")
             openai.api_version = os.environ.get("OPENAI_API_VERSION", "2022-12-01" if '4' not in self.engine else "2023-03-15-preview")
@@ -221,6 +225,8 @@ class CRSAgent:
             return self.memory.buffer
         else:
             api_type = os.environ.get("OPENAI_API_TYPE", "")
+            if api_type == "codex":
+                api_type = "open_ai"
             if len(api_type) > 0: 
                 openai.api_base = os.environ.get("OPENAI_API_BASE")
                 openai.api_version = os.environ.get("OPENAI_API_VERSION")

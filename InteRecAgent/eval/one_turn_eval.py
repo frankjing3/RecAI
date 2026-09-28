@@ -352,7 +352,7 @@ def main():
 
     args, _ = parser.parse_known_args()
 
-    domain = os.environ.get("DOMAIN", "game")
+    domain = DOMAIN
 
     domain_map = {"item": domain, "Item": domain.capitalize(), "ITEM": domain.upper()}
 

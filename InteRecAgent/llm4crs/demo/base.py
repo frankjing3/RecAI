@@ -4,8 +4,8 @@
 import os
 import json
 from langchain.prompts import example_selector
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.vectorstores import Chroma
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import Chroma
 from langchain.prompts import FewShotPromptTemplate, PromptTemplate
 
 from typing import *

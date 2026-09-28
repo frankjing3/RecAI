@@ -48,13 +48,13 @@ parser.add_argument(
 parser.add_argument(
     "--engine",
     type=str,
-    default="text-davinci-003",
-    help="Engine of OpenAI API to use. The default is text-davinci-003",
+    default=os.environ.get("AGENT_ENGINE") or os.environ.get("OPENAI_ENGINE", "text-davinci-003"),
+    help="LLM engine/deployment name. Defaults to AGENT_ENGINE or OPENAI_ENGINE from .env.",
 )
 parser.add_argument(
     "--bot_type",
     type=str,
-    default="chat",
+    default=os.environ.get("OPENAI_ENGINE_TYPE", "chat"),
     choices=["chat", "completion"],
     help="Type OpenAI models. The default is completion. Options [completion, chat]",
 )
@@ -127,7 +127,7 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-domain = os.environ.get("DOMAIN", "game")
+domain = DOMAIN
 domain_map = {"item": domain, "Item": domain.capitalize(), "ITEM": domain.upper()}
 
 default_chat_value = [

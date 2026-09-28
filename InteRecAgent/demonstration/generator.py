@@ -26,8 +26,8 @@ from llm4crs.prompt import *
 from llm4crs.utils import replace_substrings
 
 parser = argparse.ArgumentParser(prog="Demostration Generator")
-parser.add_argument('--domain', type=str, default='game')
-parser.add_argument("-e", "--engine", type=str, help="deployed LLM engine name, dependend on the deployment")
+parser.add_argument('--domain', type=str, default=os.environ.get('DOMAIN', 'game'))
+parser.add_argument("-e", "--engine", type=str, default=os.environ.get('AGENT_ENGINE') or os.environ.get('OPENAI_ENGINE'), help="deployed LLM engine name; defaults to .env")
 parser.add_argument("-n", "--num", type=int, default=20, help="number of demostrations to be generated in input-first mode; number of demonstrations for each tool using plan in output-first mode")
 parser.add_argument("-m", "--model", type=str, choices=['gpt-4', 'gpt-3.5-turbo', 'text-davinci-003'], default="text-davinci-003", help="LLM model name to use, must be the name given by OpenAI")
 parser.add_argument("-d", "--dir", type=str, default="./gen_demos", help="directory path to save the generated demonstrations")

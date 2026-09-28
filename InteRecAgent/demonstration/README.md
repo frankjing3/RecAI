@@ -20,21 +20,13 @@ Here we provide demonstration generating scripts and filtering scripts.
  
 1. You should have your LLM API, like personal OpenAI API, Azure API or some open-source LLM deployed locally, such as Vicuna.
 
-2. Add API-related info to environment and run the scripy. Just like:
+2. Configure the API in the project-root `.env` file (copy `.env.example` first),
+   then run the script. `--engine` is optional when `AGENT_ENGINE` is defined:
 
-    - Personal OpenAI API key:
-
-        ```bash
-        cd LLM4CRS/demonstration
-        OPENAI_API_KEY="xxxx" python generator.py --engine [YOUR_LLM_DEPLOY_ID] -m [LLM_MODEL_NAME]  -n 20 --mode input-first --verbose
-        ```
-
-    - Azure OpenAI API key:
-
-        ```bash
-        cd LLM4CRS/demonstration
-        OPENAI_API_KEY="xxx" OPENAI_API_BASE="xxx" OPENAI_API_VERSION="xxx" OPENAI_API_TYPE="xxx" python generator.py --engine [YOUR_LLM_DEPLOY_ID] -m [LLM_MODEL_NAME] -n 20 --mode input-first --verbose
-        ```
+    ```bash
+    cd demonstration
+    python generator.py -m gpt-4 -n 20 --mode input-first --verbose
+    ```
 
     For details about arguments, you could run: `python generator.py -h`.
 

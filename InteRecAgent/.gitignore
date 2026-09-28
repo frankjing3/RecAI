@@ -174,3 +174,10 @@ eval/log*
 *.bak
 
 oai.*
+
+# Local runtime configuration may contain API secrets.
+.env
+!.env.example
+
+# Local Matplotlib cache generated during verification.
+.matplotlib-cache/

@@ -11,6 +11,14 @@ import traceback
 import openai
 from openai import OpenAI, AzureOpenAI
 
+try:
+    from ..config import load_project_env
+except ImportError:  # Support direct execution during local diagnostics.
+    from llm4crs.config import load_project_env
+
+
+load_project_env()
+
 TOKEN_USAGE_VAR = ContextVar(
     "openai_token_usage",
     default={
@@ -48,16 +56,21 @@ class OpenAICall:
         self.api_key = api_key
         self.api_type = api_type if api_type else "open_ai"
         self.api_base = api_base if api_base else "https://api.openai.com/v1"
-        self.api_version = api_version if api_type!="open_ai" else None
+        # Accept either an OpenAI base URL or the full endpoint commonly
+        # advertised by local compatibility servers.
+        endpoint_suffix = "/chat/completions"
+        if self.api_base.rstrip("/").endswith(endpoint_suffix):
+            self.api_base = self.api_base.rstrip("/")[:-len(endpoint_suffix)]
+        self.api_version = api_version if self.api_type == "azure" else None
         self.temperature = temperature
         self.model_type = model_type
         self.retry_limits = retry_limits
         self.timeout = timeout
         self.stop_words = stop_words
 
-        if (self.api_type) and (self.api_type not in {"open_ai", "azure"}):
+        if (self.api_type) and (self.api_type not in {"open_ai", "azure", "codex"}):
             raise ValueError(
-                f"Only open_ai/azure API are supported, while got {api_type}."
+                f"Only open_ai/azure/codex API are supported, while got {api_type}."
             )
 
         model_type = "chat_completion" if "chat" in model_type else model_type
@@ -147,11 +160,14 @@ class OpenAICall:
         kwargs = {
             "model": self.model,
             "messages": msgs,
-            "temperature": temperature,
             "timeout": self.timeout,
-            "max_tokens": max_tokens,
         }
-        if self.stop_words:
+        # codex-as-api accepts the OpenAI chat message format, but rejects
+        # sampling/output controls such as temperature, max_tokens and stop.
+        if self.api_type != "codex":
+            kwargs["temperature"] = temperature
+            kwargs["max_tokens"] = max_tokens
+        if self.stop_words and self.api_type != "codex":
             kwargs["stop"] = self.stop_words
         model_resp = self.openai_client.chat.completions.create(**kwargs)
         resp = json.loads(model_resp.json())
@@ -166,11 +182,17 @@ class OpenAICall:
         else:
             content = None
 
-        usage = resp["usage"]
+        usage = resp.get("usage") or {}
 
         return content, usage
 
     def _completion(self, prompt: str, max_tokens: int, temperature: float) -> Tuple[str, Dict]:
+        if self.api_type == "codex":
+            # The local Codex endpoint implements chat completions only.
+            return self._chat_completion(
+                [{"role": "user", "content": prompt}], max_tokens, temperature
+            )
+
         kwargs = {
             "model": self.model,
             "prompt": prompt,
@@ -189,7 +211,7 @@ class OpenAICall:
         else:
             content = None
 
-        usage = resp["usage"]
+        usage = resp.get("usage") or {}
 
         return content, usage
 

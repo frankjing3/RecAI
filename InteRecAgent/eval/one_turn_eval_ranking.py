@@ -364,7 +364,7 @@ def main():
 
     random.seed(args.seed)
 
-    domain = os.environ.get("DOMAIN", 'game')
+    domain = DOMAIN
 
     domain_map = {'item': domain, 'Item': domain.capitalize(), 'ITEM': domain.upper()}
 
